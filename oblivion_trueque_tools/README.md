@@ -9,3 +9,15 @@ Informacion de APIS:
 Librerías utilizadas:
 
 Consideraciones especiales:
+En caso de que no le funcionen "pip install -r requiriments.txt" puede instalar los de forma manual con los siguientes comandos de ayuda para la instalacion utilizando "gitbash": 
+
+git init
+python -m venv venv
+source venv\Scripts\activate
+
+pip install django
+django-admin --version
+pip install django-ckeditor
+pip install Pillow
+
+git clone https://github.com/NicolasRodrigoCitro/Ingenieria-de-software-2-proyecto-truequetools.git
