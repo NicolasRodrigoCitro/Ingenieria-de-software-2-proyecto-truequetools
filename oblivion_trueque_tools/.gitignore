@@ -1,0 +1,16 @@
+venv/
+media/
+db.sqlite3
+/db
+__pycache__
+*.pyc
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff
+*.log
+*.pot
+*.pyc
+__pycache__/

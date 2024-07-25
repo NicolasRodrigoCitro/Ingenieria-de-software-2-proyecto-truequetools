@@ -1,0 +1,15 @@
+{% load static %}
+<div class="row ">
+    <div class="col-md-2 ">
+        <div class="card card-body h-100 justify-content-start align-items-start">
+            <div class="d-flex flex-column">
+                <a class="btn btn-light mb-2" href="{% url 'filtrar_productos' 1 %}">$0 - $5000</a>
+                <a class="btn btn-light mb-2" href="{% url 'filtrar_productos' 2 %}">$5000 - $10000</a>
+                <a class="btn btn-light mb-2" href="{% url 'filtrar_productos' 3 %}">$10000+</a>
+            </div> 
+        </div>
+    </div>
+    <div class="col-md-10 ">
+        {% include 'productos/partials/listado_productos.html'%}
+    </div>
+</div>

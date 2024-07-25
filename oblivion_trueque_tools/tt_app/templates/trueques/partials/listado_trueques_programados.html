@@ -1,0 +1,172 @@
+
+{% load static %}
+
+
+{% if trueques %}
+    <span class="ms-4 mt-3 mb-5 d-flex align-items-center justify-content-between">
+        <h3 class=" text-start">Listado de trueques programados para hoy</h3>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-cancelar">Cancelar trueques vencidos</button>
+    </span>
+    {% for trueque in trueques %}
+        <div class="card d-flex mb-3 ms-4 ">
+            <div class="row p-2" style="height:250px;">
+                <div class="container col-lg-5 d-flex m-auto mh-100">
+                    <div class="col-lg-5 d-flex flex-column align-items-center justify-content-center">
+                        {% if trueque.producto_solicitante.usuario == request.user %}
+                        <a href="{% url 'detalle_producto' trueque.producto_solicitante.id %}" class="d-flex" style="height:190px;">
+                            <img src="{% if trueque.producto_solicitante.imagen %}{{ trueque.producto_solicitante.imagen.url }}{% else %}{% static 'images/default-image-missing.png' %}{% endif %}" alt="{{ trueque.producto_solicitante.nombre }}" class="img-fluid rounded mh-100 m-auto border border-dark">
+                        </a>
+                        {% else %}
+                        <a href="{% url 'detalle_producto' trueque.producto_solicitado.id %}" class="d-flex" style="height:190px;">
+                            <img src="{% if trueque.producto_solicitado.imagen %}{{ trueque.producto_solicitado.imagen.url }}{% else %}{% static 'images/default-image-missing.png' %}{% endif %}" alt="{{ trueque.producto_solicitado.nombre }}" class="img-fluid rounded mh-100 m-auto border border-dark">
+                        </a>
+                        {% endif %}
+                        <small class="text-muted">{{ trueque.producto_solicitado.usuario.first_name }}</small>
+                    </div>
+                    <div class="col-lg-2 d-flex my-auto">
+                        <span class="material-symbols-outlined mx-auto">sync</span>
+                    </div>
+                    <div class="col-lg-5 d-flex flex-column align-items-center justify-content-center">
+                        {% if trueque.producto_solicitante.usuario == request.user %}
+                        <a href="{% url 'detalle_producto' trueque.producto_solicitado.id %}" class="d-flex" style="height:190px;">
+                            <img src="{% if trueque.producto_solicitado.imagen %}{{ trueque.producto_solicitado.imagen.url }}{% else %}{% static 'images/default-image-missing.png' %}{% endif %}" alt="{{ trueque.producto_solicitado.usuario.first_name }} producto" class="img-fluid rounded mh-100 m-auto border border-dark">
+                        </a>
+                        <small class="text-muted">{{ trueque.producto_solicitado.usuario.first_name }}</small>
+                        {% else %}
+                        <a href="{% url 'detalle_producto' trueque.producto_solicitante.id %}" class="d-flex" style="height:190px;">
+                            <img src="{% if trueque.producto_solicitante.imagen %}{{ trueque.producto_solicitante.imagen.url }}{% else %}{% static 'images/default-image-missing.png' %}{% endif %}" alt="{{ trueque.producto_solicitante.usuario.first_name }} producto" class="img-fluid rounded mh-100 m-auto border border-dark">
+                        </a>
+                        <small class="text-muted">{{ trueque.producto_solicitante.usuario.first_name }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body col-lg-7 d-flex flex-column justify-content-around">
+                    <h4 class="card-title">Intercambiar <a href="{% url 'detalle_producto' trueque.producto_solicitante.id %}" class="text-decoration-none text-reset">{{ trueque.producto_solicitante.nombre|striptags|truncatechars:40 }}</a> por <a href="{% url 'detalle_producto' trueque.producto_solicitado.id %}" class="text-decoration-none text-reset">{{ trueque.producto_solicitado.nombre|striptags|truncatechars:40 }}</a> </h4>
+                    {% if trueque.estado == 3 %}
+                    <p class="card-title text-success">PROGRAMADO: Deben presentarse los participantes antes del horario de cierre.</p>
+                    {%else%}
+                    <p class="card-title text-success">Error: no tiene que aparecer este mensaje!</p>
+                    {% endif %}
+                    <span class="card-text d-flex">
+                        <div class="d-flex flex-column me-auto">
+                            <p>  {{trueque.producto_solicitado.usuario.first_name }} aceptó la solicitud de {{trueque.producto_solicitante.usuario.first_name }}</p>
+                            <small class="fw-light"><b>Sucursal</b>: {{trueque.sucursal}}</small>
+                            <small class="fw-light"><b>Fecha</b>: {{trueque.fecha_programada|date:'l j \d\e F, Y'|capfirst}}</small>
+                            <small class="fw-light"><b>Horario</b>: {{trueque.get_horario_display}}</small>
+                        </div>    
+                        <button class="btn btn-success ms-auto mt-auto confirmar-trueque" 
+                            data-bs-toggle="modal" data-bs-target="#modal-confirmar"
+                            data-trueque-id="{{ trueque.id }}">
+                            Confirmar
+                        </button>  
+                    </span>     
+                        
+                    
+                </div>
+               
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <h5 class="mt-5 my-3 text-center">No tiene trueques programados para hoy.</h5> 
+    <p class="p-2 text-center"><a href="{% url 'home' %}">Volver al inicio</a></p>
+{% endif %}
+
+<div class="modal fade" id="modal-confirmar" tabindex="-1" role="dialog" 
+    aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-static" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Antes de confirmar, ¿Querés agregar ventas a este trueque?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="confirmarTrueque()">Confirmar</button>
+                <button type="button" class="btn btn-secondary" onclick="irAVentas()">Agregar ventas</button>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<div class="modal fade" id="modal-cancelar" tabindex="-1" role="dialog" 
+    aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-static modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">¿Estás seguro de cancelar todos los trueques del día de hoy?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Se cancelarán todos los trueques que figuren para la fecha de hoy. Procure utilizar este botón sólo en el horario de cierre del negocio.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-danger" onclick="cancelarTrueques()">Cancelar Trueques</button>
+            </div>
+        </div>
+    </div>  
+</div>
+
+{% block scripts %}
+<script>
+    var truequeId = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var buttons = document.querySelectorAll('.confirmar-trueque');
+        buttons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                truequeId = this.getAttribute('data-trueque-id');
+            })
+        })
+    });
+
+    function confirmarTrueque() {        
+        fetch("/concretar-trueque/" + truequeId + "/", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(function (response) {
+            if (response.ok) {
+                console.log('Trueque aceptado exitosamente.');
+                window.location.href = `/trueque/id/${truequeId}?mensaje=Se confirmó el trueque!`;
+            } else {
+                console.error('Error al aceptar el trueque. Código de estado: ' + response.status);
+            }
+        })
+        .catch(function (error) {
+            console.error('Error de red:', error);
+        });
+    }
+
+    function cancelarTrueques() {        
+        fetch("/cancelar-trueques-programados/", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(function (response) {
+            if (response.ok) {
+                window.location.href = `/trueques_programados/?mensaje=El proceso de cancelación de trueques vencidos fue exitoso.`;
+            } else {
+                console.error('Error al aceptar el trueque. Código de estado: ' + response.status);
+            }
+        })
+        .catch(function (error) {
+            console.error('Error de red:', error);
+        });
+    }
+
+    function irAVentas() {        
+        window.location.href = `/registrar-ventas/${truequeId}`;
+    }
+
+    
+
+</script>
+{% endblock %}
